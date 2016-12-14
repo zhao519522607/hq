@@ -78,7 +78,7 @@ big1() {
                         $cmd -h 10.0 $db_name > /data1/247/big1/$db_name-$time1.sql
 			if [ $? != 0 ]
                         then
-                                /usr/local/bin/sendEmail -f aa -t aa -s aa -u "mysqldump warning" -xu develop@haoqiao.cn -xp aa -m "$db_name dump failed,check it please."
+                                /usr/local/bin/sendEmail -f aa -t aa -s aa -u "mysqldump warning" -xu aa -xp aa -m "$db_name dump failed,check it please."
                         fi
                 fi
         done < /data1/shell/list/247_big
