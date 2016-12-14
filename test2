@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# -*- coding=utf-8 -*-
+
+from gevent import monkey;monkey.patch_all()
+import gevent
+from gevent import socket
+from gevent.queue import Queue
+from gevent.pool import Group
+from gevent import getcurrent
+
+def info1(i):
+    while True:
+        print('info1 Greenlet %s,index:%d'%(id(getcurrent()),i))
+        gevent.sleep(1)
+
+def info2(i):
+    while True:
+        print('info2 Greenlet %s,index:%d'%(id(getcurrent()),i))
+        gevent.sleep(1)
+
+def test_1():
+    group_test_1   = Group()
+    info=[1,2,3,4,5]
+    for i in info:
+        g= gevent.spawn(info1,i)
+        group_test_1.add(g)
+
+    group_test_1.join()
+
+def test_2():
+    group_test_2   = Group()
+    y=5
+    info=[1,2,3,4,5]
+    for i in info:
+        i = y +i
+        g=gevent.spawn(info2,i)
+        group_test_2.add(g)
+    group_test_2.join()
+
+def main():
+
+     group_info   = Group()
+     g1 = gevent.spawn(test_1)
+     g2 = gevent.spawn(test_2)
+
+     group_info.add(g1)
+     group_info.add(g2)
+
+     group_info.join()
+
+if __name__=="__main__":
+    main()
