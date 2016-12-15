@@ -7,3 +7,13 @@ CREATE TABLE `redis_stat_count` (
  `datetime` date DEFAULT NULL COMMENT '插入数据的时间',
  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='codis的key的数量、内存、ttl的状态统计'
+---------------------------------------------------------------------------------------
+CREATE TABLE `redis_slow_record` (
+ `id` int(11) not null AUTO_INCREMENT COMMENT '自增id',
+ `command` varchar(200) DEFAULT NULL COMMENT '指令详情',
+ `duration` int(10) DEFAULT NULL COMMENT '指令执行时间',
+ `start_time` datetime DEFAULT NULL COMMENT '指令开始时间',
+ `com_id` int(10) DEFAULT NULL COMMENT '指令唯一标示',
+ PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='codis慢查询语句收集'
+---------------------------------------------------------------------------------------
