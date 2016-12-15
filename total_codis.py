@@ -246,6 +246,20 @@ class CodisTools:
         except:
             print "except in stat:%s" % traceback.format_exc()
 
+    def slow_log(self):
+        try:
+            for redis_no in self.redis_clients:
+                cli_list = self.redis_clients[redis_no].slowlog_get()
+                ip = self.codis_servers[redis_no]['ip']
+                port = self.codis_servers[redis_no]['port']
+                print "It's %s:%s slow log show:" %(ip,port)
+                for i in cli_list:
+                        duration = i['duration'] / 1000
+                        start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(i['start_time']))
+                        print "指令: %s  执行时间: %sms  指令开始执行的时间: %s  唯一标示: %s" %(i['command'],duration,start_time,i['id'])
+        except:
+            print "except in slow_log:%s" % traceback.format_exc()
+
 
 def option_parser():
     try:
@@ -285,6 +299,6 @@ if __name__=="__main__":
     elif options.mode == 2:
         codisTools.stat(options.patten, options.count_per_scan, options.stat_size, options.stat_ttl)
     elif options.mode == 3:
-        pass
+        codisTools.slow_log()
     else:
         print "illegal mode:%s" % options.mode
