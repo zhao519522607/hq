@@ -248,6 +248,9 @@ class CodisTools:
 
     def slow_log(self):
         try:
+            begin_time = time.time()
+            mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
+            cursor = mysql_conn.cursor()
             for redis_no in self.redis_clients:
                 cli_list = self.redis_clients[redis_no].slowlog_get()
                 ip = self.codis_servers[redis_no]['ip']
@@ -256,7 +259,14 @@ class CodisTools:
                 for i in cli_list:
                         duration = i['duration'] / 1000
                         start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(i['start_time']))
-                        print "指令: %s  执行时间: %sms  指令开始执行的时间: %s  唯一标示: %s" %(i['command'],duration,start_time,i['id'])
+                        cursor.execute("insert into redis_slow_record (`command`,`duration`,`start_time`,`com_id`) values('%s','%s','%s','%s')" %(i['command'],duration,start_time,i['id']))
+                        #print "指令: %s  执行时间: %sms  指令开始执行的时间: %s  唯一标示: %s" %(i['command'],duration,start_time,i['id'])
+            cursor.close()
+            mysql_conn.commit()
+            mysql_conn.close()
+            end_time = time.time()
+            interval_time = end_time - begin_time
+            #print interval_time
         except:
             print "except in slow_log:%s" % traceback.format_exc()
 
