@@ -3,7 +3,7 @@
 """Stat Codis Module"""
 import sys
 import redis
-import shutil
+import MySQLdb
 import time
 import traceback
 import optparse
@@ -35,7 +35,7 @@ class CodisTools:
             else:
                 self.redis_clients[redis_no] = redis.Redis(redis_host['ip'], redis_host['port'])
         self.keys_queue = Queue()
-
+        self.mysql_server = ['1.1.1.1', '3306', 'user', 'aaaaa', 'db_name']
     def display(self):
         print self.redis_clients
 
@@ -88,8 +88,22 @@ class CodisTools:
                 print "[PrefixKey] %-50s [NumKeys] %-10d [MemSize(MB)] %-10s [TTL] %-10d" % (prekey,stats[prekey]['num_keys'],mem_size,stats[prekey]['ttl'])
         except:
             print "except in print_stat:%s" % traceback.format_exc()
-
-
+    
+    def mysql_stat(self, stats):
+	try:
+	    mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
+	    cursor = mysql_conn.cursor()
+	    for prekey in stats:
+                if stats[prekey]['num_keys'] < MIN_NUM_KEYS_FOR_PRINT:
+		    continue
+		mem_size = "%.3f" % (stats[prekey]['mem_size']*1.0 / 1024 / 1024)
+		cursor.execute("insert into redis_stat_count (`keysname`,`keysnum`,`keysmem`,`keysttl`,`datetime`) values('%s','%s','%s','%s','%s')" %(prekey,stats[prekey]['num_keys'],mem_size,stats[prekey]['ttl'],TODAY))
+	    cursor.close()
+	    mysql_conn.commit()
+	    mysql_conn.close()
+	except:
+            print "except in mysql_stat:%s" % traceback.format_exc()
+    
     def parse_prefix(self, key):
         try:
             # 切分key，获取层级数据
@@ -223,6 +237,7 @@ class CodisTools:
                         stats[prefix]['mem_size'] += stat_keys[i][prefix]['mem_size']
             #print "TotalCodisKeysStatResults    Patten[%s]" % patten
             self.print_stat(stats)
+            self.mysql_stat(stats)
             #print stats
             end_time = time.time()
             interval_time = end_time - begin_time
