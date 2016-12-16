@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 """Stat Codis Module"""
+
 import sys
 import redis
 import MySQLdb
@@ -13,6 +14,8 @@ import gevent
 import gevent.monkey
 gevent.monkey.patch_all()
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
 MAX_STAT_LEVEL = 4
 PRINT_INTERVAL = 100000
 MIN_NUM_KEYS_FOR_PRINT = 1000
@@ -247,29 +250,41 @@ class CodisTools:
             print "except in stat:%s" % traceback.format_exc()
 
     def slow_log(self):
-        try:
-            begin_time = time.time()
-            mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
-            cursor = mysql_conn.cursor()
-            for redis_no in self.redis_clients:
-                cli_list = self.redis_clients[redis_no].slowlog_get()
-                ip = self.codis_servers[redis_no]['ip']
-                port = self.codis_servers[redis_no]['port']
-                print "It's %s:%s slow log show:" %(ip,port)
-                for i in cli_list:
-                        duration = i['duration'] / 1000
-                        start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(i['start_time']))
-                        cursor.execute("insert into redis_slow_record (`command`,`duration`,`start_time`,`com_id`) values('%s','%s','%s','%s')" %(i['command'],duration,start_time,i['id']))
-                        #print "指令: %s  执行时间: %sms  指令开始执行的时间: %s  唯一标示: %s" %(i['command'],duration,start_time,i['id'])
-            cursor.close()
+       try:
+	    begin_time = time.time()
+	    name_dic = {}
+	    mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
+	    cursor = mysql_conn.cursor()
+	    for redis_no in self.redis_clients:
+		cli_list = self.redis_clients[redis_no].slowlog_get()
+		#ip = self.codis_servers[redis_no]['ip']
+		#port = self.codis_servers[redis_no]['port']
+		#print "It's %s:%s slow log show:" %(ip,port)
+		for i in cli_list:
+			duration = i['duration'] / 1000
+			start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(i['start_time']))
+			if i['command'] not in name_dic:
+				name_dic[i['command']] = [duration,start_time,i['id']]
+				#print "指令: %s  执行时间: %sms  指令开始执行的时间: %s  唯一标示: %s" %(i['command'],duration,start_time,i['id'])
+			else:
+				if duration > name_dic[i['command']][0]:
+					name_dic[i['command']][0] = duration
+				else:
+					continue
+	    for k,v in name_dic.items():
+		if len(k) < 200:
+			try:
+				cursor.execute("insert into redis_slow_record (`command`,`duration`,`start_time`,`com_id`) values('%s','%s','%s','%s')" %(k.decode('utf-8'),v[0],v[1],v[2]))
+			except:
+				pass
+	    cursor.close()
             mysql_conn.commit()
             mysql_conn.close()
-            end_time = time.time()
-            interval_time = end_time - begin_time
-            #print interval_time
-        except:
-            print "except in slow_log:%s" % traceback.format_exc()
-
+	    end_time = time.time()
+	    interval_time = end_time - begin_time
+	    #print interval_time
+	except:
+	    print "except in slow_log:%s" % traceback.format_exc()
 
 def option_parser():
     try:
