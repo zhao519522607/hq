@@ -212,7 +212,7 @@ case $1 in
 		find /data1/219/big2/ -type f > /data1/shell/big2.list
                 find /data1/247/big2/ -type f >> /data1/shell/big2.list
                 find /data1/253/big2/ -type f >> /data1/shell/big2.list
-                python /data2/shell/upload_oss.py /data1/shell/big2.list
+                python /data1/shell/upload_oss.py /data1/shell/big2.list
 		;;
 	big3)
 		big3
