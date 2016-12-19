@@ -17,3 +17,7 @@ CREATE TABLE `redis_slow_record` (
  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='codis慢查询语句收集'
 ---------------------------------------------------------------------------------------
+SELECT keysname,keysnum,keysmem,datetime from redis_stat_count where keysname='$line' order by datetime desc;
+SELECT command from redis_slow_record where DATE_SUB(CURDATE(), INTERVAL 10 DAY) <= date(start_time);
+cat /data/shell/slow_log |awk -F ':' '{print $1":"$2":"$3":"$4}' |sort |uniq -c |awk '{if($1>10) print $0}' |grep -v 'DEBUG OBJECT'
+---------------------------------------------------------------------------------------------------------------------------
