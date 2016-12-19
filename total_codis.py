@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 """Stat Codis Module"""
 
-import sys
+import sys,os
 import redis
 import MySQLdb
 import time
@@ -13,6 +13,10 @@ from gevent.pool import Group
 import gevent
 import gevent.monkey
 gevent.monkey.patch_all()
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -51,8 +55,28 @@ class CodisTools:
         except:
             print "except in list_codis_server:%s" % traceback.format_exc()
             return
+	
+    def send_mail(self, title, to_list, sub, filename):
+	try:
+	    me = title+"<"+mail_user+">"
+	    msg = MIMEMultipart('related')
+	    msg['Subject'] = sub
+	    msg['From'] = me
+	    msg['To'] = ";".join(to_list)
+	    att = MIMEText(open(filename, 'rb').read(),_subtype='plain',_charset='gb2312')
+	    att["Content-Type"] = 'application/octet-stream'
+	    att["Content-Disposition"] = 'attachment; filename=%s' %os.path.split(filename)[1]
+	    msg.attach(att)
 
-
+	    server = smtplib.SMTP()  
+            server.connect(mail_host)  
+            server.login(mail_user,mail_pass)  
+            server.sendmail(me, to_list, msg.as_string())  
+            server.close()
+	except:
+            print "except in send_mail:%s" % traceback.format_exc()
+            return
+	
     def scan_keys(self, redis_no, patten, max_count):
         try:
             cursor = 0
@@ -286,6 +310,25 @@ class CodisTools:
 	except:
 	    print "except in slow_log:%s" % traceback.format_exc()
 
+    def parse_ttl(self):
+	try:
+	    mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
+            cursor = mysql_conn.cursor()
+	    cursor.execute("SELECT distinct keysname from redis_stat_count WHERE keysttl=0")
+	    result = cursor.fetchall()
+	    if os.path.exists('/data/shell/no_ttl'):
+  		os.remove('/data/shell/no_ttl')
+	    for sql in result:
+		with open('/data/shell/no_ttl','a+') as f:
+			f.write(sql[0])
+			f.write('\n')
+	    cursor.close()
+	    mysql_conn.commit()
+	    mysql_conn.close()
+	    self.send_mail("codis no ttl list",mailto_list,'codis alarm','/data/shell/no_ttl')
+	except:
+            print "except in parse_slow:%s" % traceback.format_exc()
+	
 def option_parser():
     try:
         parser = optparse.OptionParser("python total_codis.py -h || Example For: python total_codis.py -m 2 --patten 'qunar:data:hotelsprices:*' -c 1000 --stat_size True --stat_ttl True -count False")
@@ -325,5 +368,7 @@ if __name__=="__main__":
         codisTools.stat(options.patten, options.count_per_scan, options.stat_size, options.stat_ttl)
     elif options.mode == 3:
         codisTools.slow_log()
+    elif options.mode == 4:
+	codisTools.parse_ttl()
     else:
         print "illegal mode:%s" % options.mode
