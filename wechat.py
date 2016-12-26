@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #_*_coding:utf-8 _*_
 
- 
 import urllib,urllib2
 import json
 import sys
@@ -9,7 +8,6 @@ import simplejson
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
 
 def gettoken(corpid,corpsecret):
     gettoken_url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=' + corpid + '&corpsecret=' + corpsecret
@@ -46,9 +44,9 @@ def senddata(access_token,user,subject,content):
     send_request = urllib2.Request(send_url, send_data)
     response = json.loads(urllib2.urlopen(send_request).read())
     #print str(response)
-    print "Send Messages Success!"
- 
- 
+    if response['errmsg'] == 'ok':
+        print "Send Messages Success!"
+  
 if __name__ == '__main__':
     user = str(sys.argv[1])     #zabbix传过来的第一个参数
     subject = str(sys.argv[2])  #zabbix传过来的第二个参数
