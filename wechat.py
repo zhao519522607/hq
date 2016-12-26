@@ -32,7 +32,7 @@ def senddata(access_token,user,subject,content):
  
     send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
     send_values = {
-        "touser":"",    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
+        "touser":"%s" %user,    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
         "toparty":"1",    #企业号中的部门id。
         "msgtype":"text", #消息类型。
         "agentid":"1",    #企业号中的应用id。
@@ -45,7 +45,8 @@ def senddata(access_token,user,subject,content):
     send_data = simplejson.dumps(send_values, ensure_ascii=False).encode('utf-8')
     send_request = urllib2.Request(send_url, send_data)
     response = json.loads(urllib2.urlopen(send_request).read())
-    print str(response)
+    #print str(response)
+    print "Send Messages Success!"
  
  
 if __name__ == '__main__':
