@@ -32,8 +32,8 @@ def senddata(access_token,user,subject,content):
  
     send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
     send_values = {
-        "touser":"cc",    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
-        "toparty":"c",    #企业号中的部门id。
+        "touser":"",    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
+        "toparty":"1",    #企业号中的部门id。
         "msgtype":"text", #消息类型。
         "agentid":"1",    #企业号中的应用id。
         "text":{
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     subject = str(sys.argv[2])  #zabbix传过来的第二个参数
     content = str(sys.argv[3])  #zabbix传过来的第三个参数
     
-    corpid =  'ddd'   #CorpID是企业号的标识
-    corpsecret = 'ddd'  #corpsecretSecret是管理组凭证密钥
+    corpid =  ''   #CorpID是企业号的标识
+    corpsecret = ''  #corpsecretSecret是管理组凭证密钥
     accesstoken = gettoken(corpid,corpsecret)
     senddata(accesstoken,user,subject,content)
