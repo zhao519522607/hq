@@ -5,11 +5,12 @@ import urllib,urllib2
 import json
 import sys
 import simplejson
+import traceback
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-def gettoken(corpid,corpsecret):
+def gettoken(corpid, corpsecret):
     gettoken_url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=' + corpid + '&corpsecret=' + corpsecret
     #print  gettoken_url
     try:
@@ -23,29 +24,29 @@ def gettoken(corpid,corpsecret):
     token_json.keys()
     token = token_json['access_token']
     return token
- 
- 
- 
-def senddata(access_token,user,subject,content):
- 
-    send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
-    send_values = {
-        "touser":"%s" %user,    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
-        "toparty":"1",    #企业号中的部门id。
-        "msgtype":"text", #消息类型。
-        "agentid":"1",    #企业号中的应用id。
-        "text":{
-            "content":subject + '\n' + content
-           },
-        "safe":"0"
-        }
-#    send_data = json.dumps(send_values, ensure_ascii=False)
-    send_data = simplejson.dumps(send_values, ensure_ascii=False).encode('utf-8')
-    send_request = urllib2.Request(send_url, send_data)
-    response = json.loads(urllib2.urlopen(send_request).read())
-    #print str(response)
-    if response['errmsg'] == 'ok':
-        print "Send Messages Success!"
+
+def senddata(access_token, user, subject, content):
+    try:
+        send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
+        send_values = {
+                "touser":"%s" %user,    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
+                "toparty":"7",    #企业号中的部门id。
+                "msgtype":"text", #消息类型。
+                "agentid":"9",    #企业号中的应用id。
+                "text":{
+                "content":subject + '\n' + content
+                },
+                "safe":"0"
+                }
+        send_data = simplejson.dumps(send_values, ensure_ascii=False).encode('utf-8')
+        send_request = urllib2.Request(send_url, send_data)
+        response = json.loads(urllib2.urlopen(send_request).read())
+        #print str(response)
+        if response['errmsg'] == 'ok':
+                print "Send Messages Success!"
+    except:
+        print "except in senddata:%s" % traceback.format_exc()
+
   
 if __name__ == '__main__':
     user = str(sys.argv[1])     #zabbix传过来的第一个参数
@@ -54,5 +55,5 @@ if __name__ == '__main__':
     
     corpid =  ''   #CorpID是企业号的标识
     corpsecret = ''  #corpsecretSecret是管理组凭证密钥
-    accesstoken = gettoken(corpid,corpsecret)
-    senddata(accesstoken,user,subject,content)
+    accesstoken = gettoken(corpid, corpsecret)
+    senddata(accesstoken, user, subject, content)
