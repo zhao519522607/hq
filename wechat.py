@@ -63,3 +63,17 @@ if __name__ == '__main__':
     corpsecret = ''  #corpsecretSecret是管理组凭证密钥
     accesstoken = gettoken(corpid, corpsecret)
     senddata(accesstoken, user, subject, content)
+    
+    
+ -----------------------------------------------------------------------------
+{
+   "touser": "UserID1|UserID2|UserID3",
+   "toparty": " PartyID1 | PartyID2 ",
+   "totag": " TagID1 | TagID2 ",
+   "msgtype": "text",
+   "agentid": 1,
+   "text": {
+       "content": "Holiday Request For Pony(http://xxxxx)"
+   },
+   "safe":0
+}
