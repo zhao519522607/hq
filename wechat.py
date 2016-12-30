@@ -30,7 +30,7 @@ def senddata(access_token, user, subject, content):
         send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
         send_values = {
                 "touser":"%s" %user,    #企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
-                "toparty":"7",    #企业号中的部门id。
+                #"toparty":"7",    #企业号中的部门id。
                 "msgtype":"text", #消息类型。
                 "agentid":"9",    #企业号中的应用id。
                 "text":{
@@ -44,6 +44,12 @@ def senddata(access_token, user, subject, content):
         #print str(response)
         if response['errmsg'] == 'ok':
                 print "Send Messages Success!"
+        else:
+                with open('/tmp/Wechat.log','a+') as f:
+                        f.write(user)
+                        f.write(' ')
+                        f.write(str(response))
+                        f.write('\n')
     except:
         print "except in senddata:%s" % traceback.format_exc()
 
