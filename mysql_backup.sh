@@ -189,9 +189,9 @@ case $1 in
 		find /data1/219/small/ -type f -ctime +2 -exec rm -rf {} \;
 		find /data1/247/small/ -type f -ctime +2 -exec rm -rf {} \;
 		find /data1/253/small/ -type f -ctime +2 -exec rm -rf {} \;
-		find /data1/219/small/ -type f > /data1/shell/small.list
-		find /data1/247/small/ -type f >> /data1/shell/small.list
-		find /data1/253/small/ -type f >> /data1/shell/small.list
+		find /data1/219/small/ -type f -ctime -1 > /data1/shell/small.list
+		find /data1/247/small/ -type f -ctime -1 >> /data1/shell/small.list
+		find /data1/253/small/ -type f -ctime -1 >> /data1/shell/small.list
 		python /data1/shell/upload_oss.py /data1/shell/small.list
 		;;
 	big1)
