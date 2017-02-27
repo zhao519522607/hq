@@ -30,23 +30,24 @@ def send_mail(to_list,sub,content):
         return False 
 
 def upload(file):
-    try:
-        with open(file,'r+') as f:
-              lines = f.readlines()
-              for line in lines:
-            	       line1 = line.strip('\n')
-            	       remote_file = line1.split('/data1/')
-		       oss2.resumable_upload(bucket, remote_file[1], line1,
-    		                  store=oss2.ResumableStore(root='/tmp'),
-    		                  multipart_threshold=100*1024,
-    			          part_size=100*1024,
-    				  num_threads=4)
-		       with open(line1, 'rb') as fileobj:
-			     assert bucket.get_object(remote_file[1]).read() == fileobj.read(), "%s upload oss failed!" %line1
-    except Exception,e:
-        #print "There is an error please check."
-	send_mail(mailto_list,"oss error","mysql upload oss fault,%s!" %e)
+    with open(file,'r+') as f:
+        lines = f.readlines()
+        for line in lines:
+                line1 = line.strip('\n')
+                remote_file = line1.split('/data1/')
+                oss2.resumable_upload(bucket, remote_file[1], line1,
+                               store=oss2.ResumableStore(root='/tmp'),
+                               multipart_threshold=100*1024,
+                               part_size=100*1024,
+                               num_threads=4)
+                with open(line1, 'rb') as fileobj:
+                         assert bucket.get_object(remote_file[1]).read() == fileobj.read(), "%s upload oss failed!" %line1
 
 if __name__ == '__main__':
-	file_name = sys.argv[1]
-	upload(file_name)
+        file_name = sys.argv[1]
+        try:
+                upload(file_name)
+        except Exception,e:
+                send_mail(mailto_list,'oss error','mysql upload oss fault,%s!' %e)
+                time.sleep(30)
+                upload(file_name)
