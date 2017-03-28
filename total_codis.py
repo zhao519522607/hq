@@ -329,6 +329,46 @@ class CodisTools:
 	except:
             print "except in parse_slow:%s" % traceback.format_exc()
 	
+    def clear_redis_data(self, redis_no, patten, max_count):
+        try:
+            cursor = 0
+            total_num_clear = 0
+            while True:
+                cursor, keys = self.redis_clients[redis_no].scan(cursor=cursor, match=patten, count=max_count)
+                if cursor:
+                    for key in keys:
+                        #print "clear key:%s" % key
+                        try:
+                            self.redis_clients[redis_no].delete(key)
+                            total_num_clear += 1
+                        except:
+                            print traceback.format_exc()
+                            continue
+                    #print "RedisServer[%s], Patten[%s], ClearKeys[%d]" % (self.codis_servers[redis_no], patten, total_num_clear)
+                else:
+                    print "RedisServer[%s], Patten[%s] Clear Done!" % (self.codis_servers[redis_no], patten)
+                    break
+            return
+        except:
+            print "except in clear_redis_data:%s" % traceback.format_exc()
+            return
+
+
+    def clear(self, patten, count_per_scan):
+        try:
+            workers = []
+            print "start to clear keys..."
+            for redis_no in self.redis_clients:
+                workers.append(gevent.spawn(self.clear_redis_data, redis_no, patten, count_per_scan))
+                #print "start %s clear keys..." % self.codis_servers[redis_no]
+
+            for w in workers:
+                w.join()
+            return True
+        except:
+            print 'except in clear:%s' % traceback.format_exc()
+            return False
+
 def option_parser():
     try:
         parser = optparse.OptionParser("python total_codis.py -h || Example For: python total_codis.py -m 2 --patten 'qunar:data:hotelsprices:*' -c 1000 --stat_size True --stat_ttl True -count False")
@@ -370,5 +410,8 @@ if __name__=="__main__":
         codisTools.slow_log()
     elif options.mode == 4:
 	codisTools.parse_ttl()
+    elif options.mode == 5:
+        #codisTools.clear(options.patten, options.count_per_scan)
+        pass
     else:
         print "illegal mode:%s" % options.mode
