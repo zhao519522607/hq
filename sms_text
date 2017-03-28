@@ -7,3 +7,37 @@ MESSAGE_ENCODE=$(echo "$MESSAGE_UTF8" | ${XXD} -ps | sed 's/\(..\)/%\1/g' | tr -
 
 set -x
 ${CURL} -s --connect-timeout ${TIMEOUT} "${URL}"
+
+
+
+def send_sms(to, subject, msg, retry=True):
+    try:
+        request_url = URL
+        request_url += 'un=%s' % un
+        request_url += '&pwd=%s' % pwd
+        request_url += '&mobile=%s' % to
+        request_url += '&msg=%s' % urllib.quote(msg.decode('utf-8').encode('gbk'))
+
+        #request_url = urllib.quote(request_url)
+        print request_url.decode('utf8')
+        request = urllib2.Request(request_url)
+        resp = urllib2.urlopen(request)
+        resp.status = resp.code
+        response_data = resp.read()
+
+        if resp.status != 200:
+            if retry:
+                out_put("Failed to request url=%s, status=%d, [%s]" %\
+                                  (request_url, resp.status, response_data))
+                time.sleep(1)
+                return send_sms(to, subject, msg, False)
+            else:
+                out_put("Failed to request url=%s, status=%d, [%s]" %\
+                                  (request_url, resp.status, response_data))
+        else:
+            out_put("success to request url=%s, status=%d, [%s]" %\
+                                  (request_url, resp.status, response_data))
+        return True
+    except Exception as e:
+        print 'Exception in sms:', str(e)
+        return False
