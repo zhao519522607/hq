@@ -111,7 +111,7 @@ class CodisTools:
             for prekey in stats:
                 if stats[prekey]['num_keys'] < MIN_NUM_KEYS_FOR_PRINT:
                     continue
-                mem_size = "%.3f" % (stats[prekey]['mem_size']*2.0 / 1024 / 1024)
+                mem_size = "%.3f" % (stats[prekey]['mem_size']*1.0 / 1024 / 1024)
                 print "[PrefixKey] %-50s [NumKeys] %-10d [MemSize(MB)] %-10s [TTL] %-10d" % (prekey,stats[prekey]['num_keys'],mem_size,stats[prekey]['ttl'])
         except:
             print "except in print_stat:%s" % traceback.format_exc()
