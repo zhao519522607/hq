@@ -1,5 +1,5 @@
 #!/bin/bash
-diskarray=(`cat /proc/diskstats |grep -E "\bsd[abcdefg]\b|\bvd[abcdefg]\b"|grep -i "\b$1\b"|awk '{print $3}'|sort|uniq 2>/dev/null`)
+diskarray=(`cat /proc/diskstats |grep -E "\bsd[abcdefg]\b|\bxvd[abcdefg]\b|\bvd[abcdefg]\b"|grep -i "\b$1\b"|awk '{print $3}'|sort|uniq 2>/dev/null`)
 length=${#diskarray[@]}
 printf "{\n"
 printf  '\t'"\"data\":["
@@ -13,3 +13,4 @@ do
 done
 printf  "\n\t]\n"
 printf "}\n"
+/usr/bin/iostat -xdm > /tmp/iostat_status
