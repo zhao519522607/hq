@@ -11,8 +11,8 @@ mail_host = "smtp"
 mail_user = ""
 mail_pass = ""
 oss2.defaults.connection_pool_size = 6
-auth = oss2.Auth('LTAIRNs9UF1Vwcut', 'oYDtyIGfu1LwatZ5dJDn6i9iaJRUbo')
-bucket = oss2.Bucket(auth, 'http://oss-cn-hangzhou-internal.aliyuncs.com', 'jenkins-dir')
+auth = oss2.Auth('', '')
+bucket = oss2.Bucket(auth, 'http://', '')
 
 class oper_oss(object):
 
