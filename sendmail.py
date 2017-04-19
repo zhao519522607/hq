@@ -32,6 +32,11 @@ html_template = """
         <h2 style="color:#FFFFFF; background: #4682B4;">提交说明</h2> <font size="4" color="#BF6000"><xmp>%s</xmp></font> 
         <h2 style="color:#FFFFFF; background: #5353A8;">文件清单</h2> 
         <xmp>%s</xmp> 
+	<a href="http://www.baidu.com" style="display:block;background-color:DodgerBlue;">代码修改详情</a>
+        <style type="text/css"> 
+                a:link,a:visited{font-size:20px} 
+                a:hover,a:active{font-size:22px}
+        </style>
         <hr> 
         <center> 
                 ☆ Powered by: zyb
