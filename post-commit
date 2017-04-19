@@ -1,0 +1,6 @@
+#! /bin/bash
+REPOS="$1"
+REV="$2"
+
+export LANG="zh_CN.UTF-8"   #解决提交中文乱码问题
+python /data1/shell/sendmail.py $REPOS $REV
