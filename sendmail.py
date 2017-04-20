@@ -32,17 +32,17 @@ html_template = """
         <h2 style="color:#FFFFFF; background: #4682B4;">提交说明</h2> <font size="4" color="#BF6000"><xmp>%s</xmp></font> 
         <h2 style="color:#FFFFFF; background: #5353A8;">文件清单</h2> 
         <xmp>%s</xmp> 
-	<a href="http://www.baidu.com" style="display:block;background-color:DodgerBlue;">代码修改详情</a>
-        <style type="text/css"> 
-                a:link,a:visited{font-size:20px} 
-                a:hover,a:active{font-size:22px}
-        </style>
+        <a href="http://code.abc.cn/diff/%s.diff" style="display:block;background-color:DodgerBlue;">代码修改详情</a>
+	<style type="text/css"> 
+ 		a:link,a:visited{font-size:20px} 
+ 		a:hover,a:active{font-size:22px}
+	</style>
         <hr> 
         <center> 
                 ☆ Powered by: zyb
         </center> 
 </html> 
-"""  
+"""
   
 def get_repo_name(repo):  
         return os.path.basename(repo)  
@@ -75,12 +75,13 @@ def get_file_list(repo, rev):
         output = os.popen(cmd).read()  
         return output
 
-def get_diff_dir(repo, rev):
+def get_diff_content(repo, rev):
 	"""svnlook diff -r REV REPOS 获得发生变更的文件内容
         """
         cmd = '%s diff -r %s %s' % (svnlook_bin_path, rev, repo)
         output = os.popen(cmd).read()
-        return output
+	with open('/data1/svnversion/%s.diff' %rev,'w+') as f:
+		f.write(output)
   
 def send_mail(me, to_list, msg):  
         try:  
@@ -114,8 +115,9 @@ def write_mail_content(repo, rev):
         author = get_author(repo, rev)  
         date = get_date(repo, rev)  
         log = get_log(repo, rev)
-        file_list = get_file_list(repo, rev)  
-        content = html_template % (repo, repo_name, rev, author, date, log, file_list)  
+        file_list = get_file_list(repo, rev)
+	get_diff_content(repo, rev)
+        content = html_template % (repo, repo_name, rev, author, date, log, file_list, rev)  
         return content
   
 if __name__ == '__main__':  
