@@ -23,8 +23,11 @@ URL = [
 ur_l = []
 
 def Check_URL(url):
-        rep = requests.get(url)
-        return rep.status_code
+        try:
+		rep = requests.get(url)
+		return rep.status_code
+        except:
+		return 500
 
 def url_list():
         for num in Ip_List:
