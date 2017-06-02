@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys  
+import sys,re  
 import os
 import traceback
 import smtplib
@@ -10,7 +10,9 @@ mail_host = '' #发送邮件的smtp地址
 mail_user = '' # 发送通知邮件的用户名  
 mail_pass = '' # 用户的密码  
 me = 'SVN Service'+'<'+'des'+'@'+'has'+'>' #发送邮件人的地址标识  
-to_list = ['zhao'] # 收件人  
+all_to_list = [''] # 收件人
+supplier_to_list = ['']
+api_to_list = ['']
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -118,11 +120,30 @@ def write_mail_content(repo, rev):
         file_list = get_file_list(repo, rev)
 	get_diff_content(repo, rev)
         content = html_template % (repo, repo_name, rev, author, date, log, file_list, rev)  
-        return content
+        return content,file_list
+
+def diff_dir(f_list,my_contxt):
+        regex = re.compile(r'\w*%s\w*' %my_contxt)
+        result = regex.findall(f_list)
+        if result:
+                return True
+        else:
+                return False
   
 if __name__ == '__main__':  
         svnlook_bin_path = '/usr/bin/svnlook'  
         subject = 'SVN Commit Notification'  
-        content = write_mail_content(sys.argv[1], sys.argv[2])
-        msg = write_mail(me, to_list, subject, content)
-        send_mail(me, to_list, msg)
+        content,file_list = write_mail_content(sys.argv[1], sys.argv[2])
+        msg = write_mail(me, all_to_list, subject, content)
+        send_mail(me, all_to_list, msg)
+	if diff_dir(file_list,'匹配1'):
+                msg = write_mail(me, api_to_list, subject, content)
+                send_mail(me, api_to_list, msg)
+        elif diff_dir(file_list,'匹配2'):
+                msg = write_mail(me, api_to_list, subject, content)
+                send_mail(me, api_to_list, msg)
+        elif diff_dir(file_list,'匹配3'):
+                msg = write_mail(me, supplier_to_list, subject, content)
+                send_mail(me, supplier_to_list, msg)
+        else:
+                pass
