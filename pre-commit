@@ -13,7 +13,7 @@ if [ "$LOGMSG" -lt 5 ]; then
         exit 1
 fi
 
-if [ $USER == "haoqiao" ];then
+if [ $USER == "aa" ];then
          echo -e "\n $USER 用户不允许提交操作." 1>&2
          exit 1
 fi
