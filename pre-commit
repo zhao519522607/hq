@@ -1,0 +1,25 @@
+#! /bin/bash
+#LANG=en_US.UTF-8
+#export LANG
+REPOS="$1"
+TXN="$2"
+
+LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "[a-zA-Z0-9]" |wc -c)
+USER=`/usr/bin/svnlook author -t "$TXN" "$REPOS"`
+#/usr/bin/svnlook changed -t "$TXN" "$REPOS" >> /data1/test
+
+if [ "$LOGMSG" -lt 5 ]; then
+        echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
+        exit 1
+fi
+
+if [ $USER == "haoqiao" ];then
+         echo -e "\n $USER 用户不允许提交操作." 1>&2
+         exit 1
+fi
+
+#python /data1/shell/no_commit.py $REPOS $TXN
+#if [ $? -eq 10 ];then
+#       echo -e "\n 目录禁止提交，请联系管理员." 1>&2
+#       exit 1
+#fi
