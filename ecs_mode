@@ -1,0 +1,20 @@
+ecs规格：
+ecs.s3.large    4核8G        cn-hangzhou-d  cn-hangzhou-c
+ecs.mn4.4xlarge 16核64G      cn-hangzhou-e
+ecs.c2.xlarge   16核64G      cn-hangzhou-b  cn-hangzhou-d    cn-hangzhou-c
+ecs.c2.medium   16核16G      cn-hangzhou-d  cn-hangzhou-b     
+ecs.e3.large    4核32G       cn-hangzhou-e
+ecs.m2.medium   4核32G       cn-hangzhou-b
+ecs.n2.3xlarge  16核64G      cn-hangzhou-e  cn-hangzhou-b
+ecs.c2.large    16核32G      cn-hangzhou-c  cn-hangzhou-b
+ecs.m2.xlarge   8核64G       cn-hangzhou-c  cn-hangzhou-d
+ecs.e3.xlarge   8核64G        cn-hangzhou-e  cn-hangzhou-b
+ecs.s3.medium   4核4G        cn-hangzhou-e  cn-hangzhou-d
+ecs.c1.large    8核16G       cn-hangzhou-d
+ecs.m1.xlarge   8核32G       cn-hangzhou-b
+ecs.c1.small    8核8G        cn-hangzhou-b
+ecs.t1.small    1核1G  
+
+
+https://api.aliyun.com
+https://help.aliyun.com/document_detail/25499.html?spm=5176.doc25674.6.793.ePQUxa
