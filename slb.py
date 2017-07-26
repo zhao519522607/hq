@@ -84,7 +84,7 @@ def main():
         print "Except Error in main:%s" % traceback.format_exc()
 
 def send_mail(to_list,sub,content):
-    me="oss_error"+"<"+mail_user+">"
+    me="Slb_Notice"+"<"+mail_user+">"
     msg = MIMEText(content,_subtype='plain',_charset='gb2312')
     msg['Subject'] = sub
     msg['From'] = me
