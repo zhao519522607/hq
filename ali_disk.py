@@ -84,9 +84,9 @@ if __name__ == '__main__':
         for ae in areas:
             INS = ali_disk(ae)
             INS.delete_disk('d-')
-            #INS.create_shot('d-231', 'test-30')
-            #INS.del_image('m-bp15q5cv7l31gch8vcel')
-            #INS.del_shapshot('s-bp17kgbuvah0r2q5wnpg')
+            #INS.create_shot('d-231', 'tes30')
+            #INS.del_image('m-b')
+            #INS.del_shapshot('s-bp')
             #time.sleep(40)
     except:
         print "Except Error:%s" % traceback.format_exc()
