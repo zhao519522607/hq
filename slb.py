@@ -24,6 +24,9 @@ add_dict = {}
 del_dict = {}
 mail_cotent = []
 
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 def ecs_list():
     try:
         request = DescribeInstancesRequest.DescribeInstancesRequest()
@@ -137,53 +140,62 @@ def salt_iptable(ins_ip,slb_ip,action):
             #salt_client.cmd(ins_ip,'cmd.run', ['iptables -D OUTPUT -p tcp -o eth0 -d %s -j DROP' %slb_ip])
         elif action == "add":
             print "%s -- iptables -I OUTPUT -p tcp -o eth0 -d %s -j DROP" %(ins_ip,slb_ip)
-            #ret = salt_client.cmd(ins_ip,'cmd.run', ['iptables -C OUTPUT -p tcp -o eth0 -d %s -j DROP' %slb_ip])
+            #ret = salt_client.cmd(ins_ip,'cmd.run', ['iptables-save |grep -- "-A OUTPUT -d %s/32 -o eth0 -p tcp -j DROP"' %slb_ip])
             #if ret[ins_ip] == '':
             #    salt_client.cmd(ins_ip,'cmd.run', ['iptables -I OUTPUT -p tcp -o eth0 -d %s -j DROP' %slb_ip])
             #else:
-            #    print "规则已经存在"
+                #print "%s drop %s规则已经存在" %(ins_ip,slb_ip)
+            #    mail_cotent.append("%s drop %s规则已经存在" %(ins_ip,slb_ip))
         elif action == "all":
             print "%s -- iptables -I OUTPUT -p tcp -o eth0 -d %s -j DROP" %(ins_ip,slb_ip)
-             #ret = salt_client.cmd(ins_ip,'cmd.run', ['iptables -C OUTPUT -p tcp -o eth0 -d %s -j DROP' %slb_ip])
+            #ret = salt_client.cmd(ins_ip,'cmd.run', ['iptables-save |grep -- "-A OUTPUT -d %s/32 -o eth0 -p tcp -j DROP"' %slb_ip])
             #if ret[ins_ip] == '':
             #    salt_client.cmd(ins_ip,'cmd.run', ['iptables -I OUTPUT -p tcp -o eth0 -d %s -j DROP' %slb_ip])
             #else:
-            #    print "规则已经存在"
+                #print "%s drop %s规则已经存在" %(ins_ip,slb_ip)
+            #    mail_cotent.append("%s drop %s规则已经存在" %(ins_ip,slb_ip))
         else:
             print "执行动作不合法"
     except:
         print "Except Error in salt_iptable:%s" % traceback.format_exc()
 
-def main():
+def main(choice):
     try:
-        if os.path.exists('/tmp/slb_dict.json'):
-            if os.path.getsize('/tmp/slb_dict.json'):
-                old_dict = load_data()
-            else:
-                print "slb文件为空"
-                sys.exit()
-        else:
-            print "slb存储文件不存在"
         slb_list()
         ecs_list()
         for s_id in slb_id:
             one_slb_detailed(s_id)
-        store_data(slb_dict)
-        slb_diff(old_dict,slb_dict)
-        for l3 in add_dict:
-            if add_dict[l3] not in forbid_list:
-                salt_iptable(l3,add_dict[l3],"add")
-        for l4 in del_dict:
-            if del_dict[l4] not in forbid_list:
-                salt_iptable(l4,del_dict[l4],"del")
-        for l5 in slb_dict:
-            if l5 not in forbid_list:
-                for i in slb_dict[l5]:
-                    salt_iptable(i,l5,"all")
-        for s in slb_dict:
-            if s not in forbid_list:
-                for i in slb_dict[s]:
-                    salt_custom(s,i)
+        if choice == "iptable":
+            if os.path.exists('/tmp/slb_dict.json'):
+                if os.path.getsize('/tmp/slb_dict.json'):
+                    old_dict = load_data()
+                else:
+                    print "slb文件为空"
+                    sys.exit()
+            else:
+                print "slb存储文件不存在"
+            store_data(slb_dict)
+            slb_diff(old_dict,slb_dict)
+            if add_dict:
+                for l3 in add_dict:
+                    if add_dict[l3] not in forbid_list:
+                        salt_iptable(l3,add_dict[l3],"add")
+            if del_dict:
+                for l4 in del_dict:
+                    if del_dict[l4] not in forbid_list:
+                        salt_iptable(l4,del_dict[l4],"del")
+            #if slb_dict:
+            #    for l5 in slb_dict:
+            #        if l5 not in forbid_list:
+            #            for i in slb_dict[l5]:
+            #                salt_iptable(i,l5,"all")
+        elif choice == "host":
+            for s in slb_dict:
+                if s not in forbid_list:
+                    for i in slb_dict[s]:
+                        salt_custom(s,i)
+        else:
+            print "参数不合法"
     except:
         print "Except Error in main:%s" % traceback.format_exc()
 
@@ -203,6 +215,10 @@ def send_mail(to_list,sub,content):
         print "except in send_mail:%s" % traceback.format_exc()
 
 if __name__ == '__main__':
-    main()
+    try:
+        arg = sys.argv[1]
+        main(arg)
+    except:
+        print "Except Error in: %s" % traceback.format_exc()
     if mail_cotent:
         send_mail(mailto_list,"slb domain server and client conflict!",str(mail_cotent))
