@@ -15,10 +15,7 @@ done
 \cp -r /data1/jenkins_dir/conf/www_service/* application/config/
 #功能函数操作
 gzip $PROJECT
-rm -rf application/config/database.php
-rm -rf application/config/jpush.php
-rm -rf application/config/alipay.php
-rm -rf application/config/aliyunoss.php
+rm -rf applicati/aa
 for i in $IP
 do
 	upfile $PROJECT $USER $i $DIR
