@@ -1,0 +1,44 @@
+#! /bin/bash
+Load() {
+	name=$1
+	path="/jenkins_home/.jenkins/workspace/shell"
+	module="$path/modules/$name"
+	if [ -f $module ];then
+		. "$module"
+	else
+		echo "Error: File is not found $module"
+		exit 1
+	fi
+}
+-------------------------------------
+#! /bin/bash
+
+upfile() {
+	f="../package/$1.tgz"
+	user=$2
+	ip=$3
+	dir=$4
+	scp -i ../sshkeys/$user"_rsa" $f $user@$ip:$dir
+}
+
+upload_name() {
+     f=$1
+     user=$2
+     ip=$3
+     dir=$4
+     scp -i ../sshkeys/$user"_rsa" $f $user@$ip:$dir
+}
+
+cmd() {
+	user=$1
+        ip=$2
+	c_name=$3
+	ssh -i ../sshkeys/$user"_rsa" $user@$ip "$c_name"
+}
+-------------------------------------------------------
+#! /bin/bash
+
+gzip() {
+	p_name=$1
+	tar zcf ../package/$p_name.tgz ../$p_name
+}
