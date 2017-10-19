@@ -1,25 +1,31 @@
 #! /bin/bash
-#LANG=en_US.UTF-8
-#export LANG
+export LANG="zh_CN.UTF-8"
 REPOS="$1"
 TXN="$2"
-
-LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "[a-zA-Z0-9]" |wc -c)
+#LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "[a-zA-Z0-9]" |wc -c)
+LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |wc -w)
+SIGN_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID" |wc -l)
 USER=`/usr/bin/svnlook author -t "$TXN" "$REPOS"`
-#/usr/bin/svnlook changed -t "$TXN" "$REPOS" >> /data1/test
+#/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID" >> /data1/develop/test
 
-if [ "$LOGMSG" -lt 5 ]; then
-        echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
-        exit 1
+if [ "$LOGMSG" -lt 1 ];then
+	echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
+	exit 1
 fi
 
-if [ $USER == "aa" ];then
-         echo -e "\n $USER 用户不允许提交操作." 1>&2
-         exit 1
+if [ $SIGN_MSG -lt 1 ];then
+    echo -e "\n $USER 必须添加 \"需求ID:\" 才能提交." 1>&2
+    exit 1
 fi
 
+if [ $USER == "haaa" ];then
+	 echo -e "\n $USER 用户不允许提交操作." 1>&2
+     exit 1
+fi
+
+#禁止某些特定的目录提交
 #python /data1/shell/no_commit.py $REPOS $TXN
 #if [ $? -eq 10 ];then
-#       echo -e "\n 目录禁止提交，请联系管理员." 1>&2
-#       exit 1
+#	echo -e "\n 目录禁止提交，请联系管理员." 1>&2
+#	exit 1
 #fi
