@@ -130,7 +130,10 @@ big2() {
                         fi
                 fi
         done < /data1/shell/list/247_big
-	find /data1/247/big2/ -name "*.sql" -type f -exec gzip {} \;
+	#恢复 cat  summary-2017110602.sql.gz.* > summary-2017110602.sql.gz 然后再gzip -d
+        find /data1/247/big2/ -name "*.sql" -type f -exec gzip {} \;
+        find /data1/247/big2/ -name "*.gz" -type f -exec split -b 2048m {} {}. \;
+        find /data1/247/big2/ -name "*.gz" -type f -exec rm -rf {} \;
         while read line
         do
                 capacity=`echo $line |awk '{print $1}' |awk -F 'G' '{print $1}'`
