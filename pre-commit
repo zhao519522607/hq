@@ -4,9 +4,12 @@ REPOS="$1"
 TXN="$2"
 #LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "[a-zA-Z0-9]" |wc -c)
 LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |wc -w)
-SIGN_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID" |wc -l)
+SIGN_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID:[ ]*[0-9]\{4,\}" |wc -l)
+CONTROL_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "aa|vv|ss|dd" |wc -l)
+CONTROL_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "0000" |wc -l)
 USER=`/usr/bin/svnlook author -t "$TXN" "$REPOS"`
 #/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID" >> /data1/develop/test
+#/usr/bin/svnlook changed -t "$TXN" "$REPOS" >> /data1/python/test
 
 if [ "$LOGMSG" -lt 1 ];then
 	echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
@@ -18,7 +21,12 @@ if [ $SIGN_MSG -lt 1 ];then
     exit 1
 fi
 
-if [ $USER == "haaa" ];then
+if [ $CONTROL_DIR -ge 1 ] && [ $CONTROL_MSG -ge 1 ];then
+    echo -e "\n $USER 该目录为控制目录,需求ID为0000不允许提交" 1>&2
+    exit 1
+fi
+
+if [ $USER == "haoqiao" ];then
 	 echo -e "\n $USER 用户不允许提交操作." 1>&2
      exit 1
 fi
