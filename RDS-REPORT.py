@@ -22,11 +22,11 @@ mail_pass = "密码"
 today = datetime.datetime.today().strftime("%Y-%m-%d")
 stime = (datetime.datetime.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M")
 etime = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
-ids = ["id1,"id2"]
+ids = ["id1,"id2","id3","id4"]
 
 class report(object):
 	def __init__(self,are):
-		self.client = client.AcsClient("",are)
+		self.client = client.AcsClient("","",are)
 
 	def create_report(self,id):
 		try:
@@ -117,14 +117,14 @@ if __name__ == '__main__':
 				data = f.read() 
 				with open("/data1/RDSPDF/%s.pdf" %u, 'wb') as code:   
 					code.write(data)
-				if u == "rm-bp1v2c5atpc8zk2ko":
-					send_mail(mailto_car,"用车数据库慢查询分析报告",u)
-				elif u == 'rm-bp1er6r8881594i46':
-					send_mail(mailto_basic,"分销类数据主库慢查询分析报告",u)
-				elif u == 'rr-bp1d48usb2y0w7212':
-					send_mail(mailto_basic,"分销类数据从库慢查询分析报告",u)
-				elif u == 'rm-bp1u67k73725dnls8':
-					send_mail(mailto_basic,"基础数据库慢查询分析报告",u)
+				if u == "id1":
+					send_mail(mailto_car,"b数据库慢查询分析报告",u)
+				elif u == 'id2':
+					send_mail(mailto_basic,"主库慢查询分析报告",u)
+				elif u == 'id3':
+					send_mail(mailto_basic,"从库慢查询分析报告",u)
+				elif u == 'id4':
+					send_mail(mailto_basic,"a数据库慢查询分析报告",u)
 				else:
 					pass
 		else:
