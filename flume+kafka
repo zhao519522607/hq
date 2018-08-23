@@ -1,0 +1,59 @@
+jdk 1.8
+hq.sources = r1 r2
+hq.sinks = k1 k2
+hq.channels = c1 c2
+
+#source TAILDIR
+hq.sources.r1.type = TAILDIR
+hq.sources.r1.positionFile = /tmp/flume_position_access.json
+hq.sources.r1.filegroups = f1
+hq.sources.r1.filegroups.f1 = /data1/hqs_runtime/log/request_access/.*.log
+hq.sources.r1.headers.f1.headerKey1 = access
+hq.sources.r1.fileHeader = true
+
+hq.sources.r2.type = TAILDIR
+hq.sources.r2.positionFile = /tmp/flume_position_result.json
+hq.sources.r2.filegroups = f2
+hq.sources.r2.filegroups.f2 = /data1/hqs_runtime/log/request_result/.*.log
+hq.sources.r2.headers.f2.headerKey1 = result
+hq.sources.r2.fileHeader = true
+
+# Describe the sink
+#hq.sinks.k3.type = logger
+
+#kafka
+hq.sinks.k1.type = org.apache.flume.sink.kafka.KafkaSink
+hq.sinks.k1.kafka.topic = Request_Access
+hq.sinks.k1.kafka.bootstrap.servers = kafka:8080
+hq.sinks.k1.kafka.flumeBatchSize = 20
+hq.sinks.k1.kafka.producer.acks = 1
+hq.sinks.k1.kafka.producer.linger.ms = 1
+#hq.sinks.k1.kafka.producer.compression.type = snappy
+
+hq.sinks.k2.type = org.apache.flume.sink.kafka.KafkaSink
+hq.sinks.k2.kafka.topic = Request_Result
+hq.sinks.k2.kafka.bootstrap.servers = kafka:8080
+hq.sinks.k2.kafka.flumeBatchSize = 20
+hq.sinks.k2.kafka.producer.acks = 1
+hq.sinks.k2.kafka.producer.linger.ms = 1
+#hq.sinks.k2.kafka.producer.compression.type = snappy
+
+# Use a channel which buffers events in memory
+hq.channels.c1.type = memory
+hq.channels.c1.capacity = 10000
+hq.channels.c1.transactionCapacity = 10000
+hq.channels.c1.byteCapacityBufferPercentage = 20
+#hq.channels.c1.byteCapacity = 800000
+
+# Use a channel which buffers events in memory
+hq.channels.c2.type = memory
+hq.channels.c2.capacity = 10000
+hq.channels.c2.transactionCapacity = 10000
+hq.channels.c2.byteCapacityBufferPercentage = 20
+#hq.channels.c1.byteCapacity = 800000
+
+# Bind the source and sink to the channel
+hq.sources.r1.channels = c1
+hq.sources.r2.channels = c1
+hq.sinks.k1.channel = c1
+hq.sinks.k2.channel = c1
