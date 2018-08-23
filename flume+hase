@@ -1,0 +1,71 @@
+                      Flume+hbase
+1.	先将对应的版本lib拷贝到flume
+2.	Flume的配置
+#hbase
+#hq.sinks.k3.type = hbase
+#hq.sinks.k3.table = hqs_supplier_request_access
+#hq.sinks.k3.columnFamily = log
+#hq.sinks.k3.serializer = org.apache.flume.sink.hbase.SimpleHbaseEventSerializer
+#hq.sinks.k3.zookeeperQuorum = zoo:2181
+#hq.sinks.k3.znodeParent = /hbase
+3.	Flume支持的hbase模式:
+3.1	HbaseSink
+3.1.1	SimpleHbaseEventSerializer: 将整个事件body部分当做完整的一列写入hbase
+3.1.2	RegexHbaseEventSerializer: 根据正则表达式将event body拆分到不同的列当中
+3.2	AsyncHbaseSink
+3.2.1	SimpleAsyncHbaseEventSerializer 异步化
+4.	hbase查询数据
+4.1	通过单个row key访问
+4.2	通过row key的range
+4.3	全表扫描
+4.4	Column 如果不同，get的时候可以指定到具体的列族  get 't1', 'r1', {COLUMN => 'c1'}
+5.	Hbase的表组成
+5.1	Row Key（相当于索引）
+5.2	列族
+5.3	单元 
+5.4	时间戳
+6.	Hbase可以搭配es使用二级缓存，也可以用hbase+mapreduce
+--------------------------------------------------------------
+hq.sources = r1 
+hq.sinks = k1
+hq.channels = c1
+
+#source TAILDIR
+hq.sources.r1.type = TAILDIR
+hq.sources.r1.positionFile = /tmp/flume_position_access.json
+hq.sources.r1.filegroups = f1
+hq.sources.r1.filegroups.f1 = /data/logs/access_logs/.*.log
+hq.sources.r1.headers.f1.headerKey1 = access
+hq.sources.r1.fileHeader = true
+
+# Describe the sink
+#hq.sinks.k3.type = logger
+
+#hbase
+hq.sinks.k1.type = hbase
+hq.sinks.k1.table = nginx_log
+hq.sinks.k1.columnFamily = access
+#hq.sinks.k1.serializer = org.apache.flume.sink.hbase.SimpleHbaseEventSerializer
+hq.sinks.k1.serializer = org.apache.flume.sink.hbase.RegexHbaseEventSerializer
+hq.sinks.k1.zookeeperQuorum = zoo:2181
+hq.sinks.k1.znodeParent = /hbase
+hq.sinks.k1.serializer.regex = .* - \\[(.*)\\] \\"(.*)\\" \\d+ .* \\"(\\d+.\\d+.\\d+.\\d+)\\".*
+hq.sinks.k1.serializer.colNames = ROW_KEY,URL,IP
+#hq.sinks.k1.serializer.colNames = TIME,URL,ROW_KEY
+hq.sinks.k1.serializer.rowKeyIndex = 0
+
+# Use a channel which buffers events in memory
+hq.channels.c1.type = memory
+hq.channels.c1.capacity = 10000
+hq.channels.c1.transactionCapacity = 10000
+hq.channels.c1.byteCapacityBufferPercentage = 20
+#hq.channels.c1.byteCapacity = 800000
+
+# Bind the source and sink to the channel
+hq.sources.r1.channels = c1
+hq.sinks.k1.channel = c1
+------------------------------------------------------
+disable 'nginx_log'
+drop 'nginx_log'
+create 'nginx_log', 'access'
+scan 'nginx_log'
