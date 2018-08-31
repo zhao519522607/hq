@@ -69,3 +69,45 @@ disable 'nginx_log'
 drop 'nginx_log'
 create 'nginx_log', 'access'
 scan 'nginx_log'
+
+----------------------------------------------------------
+
+hq.sources = r1 
+hq.sinks = k1
+hq.channels = c1
+
+#source TAILDIR
+hq.sources.r1.type = TAILDIR
+hq.sources.r1.positionFile = /tmp/flume_position_access.json
+hq.sources.r1.filegroups = f1
+hq.sources.r1.filegroups.f1 = /data/logs/access_logs/.*.log
+hq.sources.r1.headers.f1.headerKey1 = access
+hq.sources.r1.fileHeader = true
+
+# Describe the sink
+#hq.sinks.k3.type = logger
+
+#hbase
+hq.sinks.k1.type = hbase
+hq.sinks.k1.table = nginx_log
+hq.sinks.k1.columnFamily = access
+#hq.sinks.k1.serializer = org.apache.flume.sink.hbase.SimpleHbaseEventSerializer
+hq.sinks.k1.serializer = org.apache.flume.sink.hbase.RegexHbaseEventSerializer
+hq.sinks.k1.zookeeperQuorum = ip:2181
+hq.sinks.k1.znodeParent = /hbase
+#hq.sinks.k1.serializer.regex = .* - \\[(.*)\\] \\"(.*)\\" \\d+ .* \\"(\\d+.\\d+.\\d+.\\d+)\\".*
+hq.sinks.k1.serializer.regex = (.* - \\[(.*)\\] \\"(.*)\\" \\d+ .* \\"(\\d+.\\d+.\\d+.\\d+)\\".*)
+#hq.sinks.k1.serializer.colNames = ROW_KEY,URL,IP
+hq.sinks.k1.serializer.colNames = CONTEXT,ROW_KEY,URL,IP
+hq.sinks.k1.serializer.rowKeyIndex = 1
+
+# Use a channel which buffers events in memory
+hq.channels.c1.type = memory
+hq.channels.c1.capacity = 10000
+hq.channels.c1.transactionCapacity = 10000
+hq.channels.c1.byteCapacityBufferPercentage = 20
+#hq.channels.c1.byteCapacity = 800000
+
+# Bind the source and sink to the channel
+hq.sources.r1.channels = c1
+hq.sinks.k1.channel = c1
