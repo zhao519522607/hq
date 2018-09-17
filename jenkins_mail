@@ -1,0 +1,12 @@
+构建通知:$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!
+
+<hr/>
+(本邮件是程序自动下发的，请勿回复！)<br/><hr/>
+项目名称：$PROJECT_NAME<br/><hr/>
+构建编号：$BUILD_NUMBER<br/><hr/>
+svn版本号：${SVN_REVISION}<br/><hr/>
+构建状态：$BUILD_STATUS<br/><hr/>
+触发原因：${CAUSE}<br/><hr/>
+构建日志地址：<a href="${BUILD_URL}console">${BUILD_URL}console</a><br/><hr/>
+构建地址：<a href="$BUILD_URL">$BUILD_URL</a><br/><hr/>
+变更集:${JELLY_SCRIPT,template="html"}<br/><hr/>
