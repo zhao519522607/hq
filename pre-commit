@@ -2,14 +2,14 @@
 export LANG="zh_CN.UTF-8"
 REPOS="$1"
 TXN="$2"
-#LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "[a-zA-Z0-9]" |wc -c)
 LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |wc -w)
 SIGN_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID:[ ]*[0-9]\{4,\}" |wc -l)
-CONTROL_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "aa|vv|ss|dd" |wc -l)
-CONTROL_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "0000" |wc -l)
+#CONTROL_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "aetra|stat|sah|tel" |wc -l)
+#CONTROL_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "0000" |wc -l)
+NEED_ID=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}")
+OA_ID=$(echo $NEED_ID |sed 's/[ ][ ]*/\|/g')
+RESULT=$(curl -s "ffgg/pm/seddce/check_pm_ids?pm_ids=$OA_ID")
 USER=`/usr/bin/svnlook author -t "$TXN" "$REPOS"`
-#/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID" >> /data1/develop/test
-#/usr/bin/svnlook changed -t "$TXN" "$REPOS" >> /data1/python/test
 
 if [ "$LOGMSG" -lt 1 ];then
 	echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
@@ -21,12 +21,20 @@ if [ $SIGN_MSG -lt 1 ];then
     exit 1
 fi
 
-if [ $CONTROL_DIR -ge 1 ] && [ $CONTROL_MSG -ge 1 ];then
-    echo -e "\n $USER 该目录为控制目录,需求ID为0000不允许提交" 1>&2
-    exit 1
+if [ $RESULT -eq 0 ];then
+	echo -e "\n 需求id不存在,禁止提交." 1>&2
+	exit 1
+elif [ $RESULT -eq -1 ];then
+	echo -e "\n 需求已上线超过一周,禁止提交." 1>&2
+	exit 1
 fi
 
-if [ $USER == "haoqiao" ];then
+#if [ $CONTROL_DIR -ge 1 ] && [ $CONTROL_MSG -ge 1 ];then
+#    echo -e "\n $USER 该目录为控制目录,需求ID为0000不允许提交" 1>&2
+#    exit 1
+#fi
+
+if [ $USER == "aao" ];then
 	 echo -e "\n $USER 用户不允许提交操作." 1>&2
      exit 1
 fi
