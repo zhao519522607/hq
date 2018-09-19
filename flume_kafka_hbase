@@ -1,0 +1,55 @@
+hq.sources = r1 
+hq.sinks = k1
+hq.channels = c1
+
+#source TAILDIR
+hq.sources.r1.type = TAILDIR
+hq.sources.r1.positionFile = /tmp/flume_position_access.json
+hq.sources.r1.filegroups = f1
+hq.sources.r1.filegroups.f1 = /data/logs/flume/3.log
+hq.sources.r1.headers.f1.headerKey1 = aaa_download
+hq.sources.r1.fileHeader = true
+
+#source KAFKA
+hq.sources.r1.type = org.apache.flume.source.kafka.KafkaSource
+hq.sources.r1.batchSize = 200
+hq.sources.r1.batchDurationMillis = 1000
+hq.sources.r1.kafka.bootstrap.servers = kafka.haoqiao.com:8080
+hq.sources.r1.kafka.consumer.max.partition.fetch.bytes = 10240000
+hq.sources.r1.kafka.consumer.auto.offset.reset = latest
+#hq.sources.r1.kafka.consumer.timeout.ms = 1000
+hq.sources.r1.kafka.topics = Download_logs
+hq.sources.r1.kafka.consumer.group.id = flume_aa
+
+# Describe the sink
+#hq.sinks.k2.type = logger
+
+# sink file
+#hq.sinks.k2.type = file_roll
+#hq.sinks.k2.sink.directory = /data/logs/flume/log
+#hq.sinks.k2.sink.rollInterval = 0 
+
+#hbase
+hq.sinks.k1.type = hbase
+hq.sinks.k1.table = haoqiao_tracreid
+hq.sinks.k1.columnFamily = sign
+hq.sinks.k1.serializer = org.apache.flume.sink.hbase.RegexHbaseEventSerializer
+hq.sinks.k1.zookeeperQuorum = aaa:2181
+hq.sinks.k1.znodeParent = /hbase
+#hq.sinks.k1.batchSize = 200
+hq.sinks.k1.serializer.regex = \\{"SECONDID":\\"(.*)\\","LOG_LEVEL":\\"(.*)\\","CONTEXT":(.*),"SERVER_NAME":\\"(.*)\\","URL":\\"(.*)\\","DATETIME":\\"(.*)\\","SOURCE_IP":\\[\\"(.*)\\"\\],"TRACERTID":\\"(.+)\\"\\}
+hq.sinks.k1.serializer.colNames = SECONDID,LOG_LEVEL,CONTEXT,SERVER_NAME,URL,DATETIME,SOURCE_IP,ROW_KEY
+hq.sinks.k1.serializer.rowKeyIndex = 7
+
+# Use a channel which buffers events in memory
+hq.channels.c1.type = memory
+hq.channels.c1.capacity = 10000
+hq.channels.c1.transactionCapacity = 10000
+hq.channels.c1.byteCapacityBufferPercentage = 20
+#hq.channels.c1.byteCapacity = 800000
+
+# Bind the source and sink to the channel
+hq.sources.r1.channels = c1
+hq.sinks.k1.channel = c1
+#hq.sinks.k2.channel = c1
+You have new mail in /var/spool/mail/root
