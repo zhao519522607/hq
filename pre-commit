@@ -34,7 +34,7 @@ fi
 #   do
 #       qa_result=$(svn log svn://url |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
 #       if [ $qa_result -eq 0 ];then
-#           echo -e "\n $id 没有提交到QA分支,禁止提交到TRUNK." 1>&2
+#           echo -e "\n 需求: $id 没有提交到QA分支,禁止提交到TRUNK." 1>&2
 #           exit 1
 #       fi
 #   done
@@ -43,7 +43,7 @@ fi
 #    do
 #        beta_result=$(svn log svn://url|grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
 #        if [ $beta_result -eq 0 ];then
-#            echo -e "\n $id 没有提交到BETA分支,禁止提交到TRUNK." 1>&2
+#            echo -e "\n 需求: $id 没有提交到BETA分支,禁止提交到TRUNK." 1>&2
 #            exit 1
 #        fi
 #    done
