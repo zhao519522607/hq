@@ -310,7 +310,7 @@ class CodisTools:
 	except:
 	    print "except in slow_log:%s" % traceback.format_exc()
 
-    def parse_ttl(self):
+    def ttl(self):
 	try:
 	    mysql_conn = MySQLdb.connect(host=self.mysql_server[0], port=int(self.mysql_server[1]), user=self.mysql_server[2], passwd=self.mysql_server[3], db=self.mysql_server[4])
             cursor = mysql_conn.cursor()
@@ -409,7 +409,7 @@ if __name__=="__main__":
     elif options.mode == 3:
         codisTools.slow_log()
     elif options.mode == 4:
-	codisTools.parse_ttl()
+	codisTools.ttl()
     elif options.mode == 5:
         #codisTools.clear(options.patten, options.count_per_scan)
         pass
