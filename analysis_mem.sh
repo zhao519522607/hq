@@ -2,7 +2,7 @@
 
 dir=$(dirname $0)
 mail_to="zhao"
-mail_cmd="/usr/local/bin/sendEmail -f develop -t $mail_to -s smtp.exmail.qq.com -o message-charset=utf-8 -xu develop -xp aaa"
+mail_cmd="/usr/local/bin/sendEmail -f develop -t $mail_to -s smtp.com -o message-charset=utf-8 -xu develop -xp aaa"
 
 if [ -f $dir/mem.csv ]
 then
