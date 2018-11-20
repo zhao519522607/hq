@@ -4,63 +4,86 @@ REPOS="$1"
 TXN="$2"
 LOGMSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |wc -w)
 SIGN_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "需求ID:[ ]*[0-9]\{4,\}" |wc -l)
-#CONTROL_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "aetra|stat|sah|tel" |wc -l)
-#CONTROL_MSG=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep "0000" |wc -l)
+CONTROL_DIR=$(/usr/bin/svnlook dirs-changed -t "$TXN" "$REPOS" |egrep "trunk|branches/offline|beta|qa" |wc -l)
+OA_TRUNK_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "trunk/website/wisetravel_oa" |wc -l)
+WWW_TRUNK_DIR=$(/usr/bin/svnlook changed -t "$TXN" "$REPOS" |egrep "trunk/website/wisetravel_com" |wc -l)
 NEED_ID=$(/usr/bin/svnlook log -t "$TXN" "$REPOS" |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}")
 OA_ID=$(echo $NEED_ID |sed 's/[ ][ ]*/\|/g')
-RESULT=$(curl -s "ffgg/pm/seddce/check_pm_ids?pm_ids=$OA_ID")
+RESULT=$(curl -s "Url_c?pm_ids=$OA_ID")
 USER=`/usr/bin/svnlook author -t "$TXN" "$REPOS"`
 
+# 提交代码必须包含注释
 if [ "$LOGMSG" -lt 1 ];then
 	echo -e "\n 提交文件时必须添加注释,提交中止." 1>&2
 	exit 1
 fi
 
-if [ $SIGN_MSG -lt 1 ];then
-    echo -e "\n $USER 必须添加 \"需求ID:\" 才能提交." 1>&2
-    exit 1
+# 只有trunk和offline分支触发规则
+if [ $CONTROL_DIR -ge 1 ];then
+	if [ $SIGN_MSG -lt 1 ];then
+		echo -e "\n $USER 必须添加 \"需求ID:\" 才能提交." 1>&2
+		exit 1
+	fi
+
+	if [ $RESULT -eq 0 ];then
+		echo -e "\n 需求id不存在,禁止提交." 1>&2
+		exit 1
+	elif [ $RESULT -eq -1 ];then
+		echo -e "\n 需求已上线超过一周,禁止提交." 1>&2
+		exit 1
+	fi
 fi
 
-if [ $RESULT -eq 0 ];then
-	echo -e "\n 需求id不存在,禁止提交." 1>&2
-	exit 1
-elif [ $RESULT -eq -1 ];then
-	echo -e "\n 需求已上线超过一周,禁止提交." 1>&2
-	exit 1
+# 控制oa项目的提交顺序
+if [ $OA_TRUNK_DIR -ge 1 ];then
+	for id in $NEED_ID
+	do
+		qa_result=$(svn log svn://url_a |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
+		if [ $qa_result -eq 0 ];then
+			echo -e "\n 需求: $id 没有提交到QA分支,禁止提交到TRUNK." 1>&2
+			exit 1
+		fi
+	done
+
+	for id in $NEED_ID
+    do
+        beta_result=$(svn log svn://url_b |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
+        if [ $beta_result -eq 0 ];then
+            echo -e "\n 需求: $id 没有提交到BETA分支,禁止提交到TRUNK." 1>&2
+            exit 1
+        fi
+    done
 fi
 
-#if [ $OA_TRUNK_DIR -ge 1 ];then
-#   for id in $NEED_ID
-#   do
-#       qa_result=$(svn log svn://url |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
-#       if [ $qa_result -eq 0 ];then
-#           echo -e "\n 需求: $id 没有提交到QA分支,禁止提交到TRUNK." 1>&2
-#           exit 1
-#       fi
-#   done
-#
-#   for id in $NEED_ID
-#    do
-#        beta_result=$(svn log svn://url|grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
-#        if [ $beta_result -eq 0 ];then
-#            echo -e "\n 需求: $id 没有提交到BETA分支,禁止提交到TRUNK." 1>&2
-#            exit 1
-#        fi
-#    done
-#fi
+# 控制www项目的提交顺序
+if [ $WWW_TRUNK_DIR -ge 1 ];then
+    for id in $NEED_ID
+    do
+        qa_result=$(svn log svn://url_a |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
+        if [ $qa_result -eq 0 ];then
+            echo -e "\n 需求: $id 没有提交到QA分支,禁止提交到TRUNK." 1>&2
+            exit 1
+        fi
+    done
 
-#if [ $CONTROL_DIR -ge 1 ] && [ $CONTROL_MSG -ge 1 ];then
-#    echo -e "\n $USER 该目录为控制目录,需求ID为0000不允许提交" 1>&2
-#    exit 1
-#fi
+    for id in $NEED_ID
+    do
+        beta_result=$(svn log svn://url_b |grep -v "^$" |grep -o "需求ID:[ ]*[0-9]\{4,\}" |grep -o "[0-9]\{4,\}" |sort |uniq |egrep -o $id |wc -l)
+        if [ $beta_result -eq 0 ];then
+            echo -e "\n 需求: $id 没有提交到BETA分支,禁止提交到TRUNK." 1>&2
+            exit 1
+        fi
+    done
+fi
 
-if [ $USER == "aao" ];then
+# 禁止haoqiao用户提交代码
+if [ "$USER" == "haoqiao" ];then
 	 echo -e "\n $USER 用户不允许提交操作." 1>&2
      exit 1
 fi
 
-#禁止某些特定的目录提交
-#python /data1/shell/no_commit.py $REPOS $TXN
+# 禁止某些特定的目录提交
+#python /data/shell/no_commit.py $REPOS $TXN
 #if [ $? -eq 10 ];then
 #	echo -e "\n 目录禁止提交，请联系管理员." 1>&2
 #	exit 1
