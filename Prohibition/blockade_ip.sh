@@ -46,3 +46,7 @@ done < $Work_dir/all_ip_list
 #if [ -s $Work_dir/Record ];then
 #	$Mail_cmd -u "请求查价次数预警" -o message-file=$Work_dir/Record
 #fi
+
+
+#查询一分钟的日志
+grep "$(date -d "1 minute ago" +"%F %H:%M")" $Log_dir/$Log_name |grep "hqs返回数据处理前|第1次请求" |awk '{a[$(NF-2)]++} END{for(i in a) if(a[i]>10) print a[i],i}'
