@@ -8,6 +8,7 @@ import MySQLdb
 import time
 import traceback
 import optparse
+import zookeeper,json
 from Queue import Queue
 from gevent.pool import Group
 import gevent
@@ -23,17 +24,28 @@ sys.setdefaultencoding('utf-8')
 MAX_STAT_LEVEL = 4
 PRINT_INTERVAL = 100000
 MIN_NUM_KEYS_FOR_PRINT = 1000
+TODAY = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+mailto_list = ["to_user_mail"]
+mail_host = "smtp_server"
+mail_user = "user_name"
+mail_pass = "password"
+ser_list = []
+zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
+
+def get_codis_server():
+        handler = zookeeper.init("1.1.1.1:2181")
+        data = zookeeper.get_children(handler,"/codis3/db/group")
+        for i in data:
+                i_s = zookeeper.get(handler,"/codis3/db/group/%s" %i)[0]
+                i_list = json.loads(i_s)['servers'][0]['server']
+                i_ip = i_list.split(':')
+                tmp_dic = {'ip': str(i_ip[0]), 'port': int(i_ip[1]), 'pass':''}
+                ser_list.append(tmp_dic)
+        zookeeper.close(handler)
 
 class CodisTools:
-
     def __init__(self):
-        self.codis_servers = [
-                                #{'ip':'1.1.1.1', 'port':6382, 'pass':''},                                            # Online Codis 
-                                #{'ip':'2.2.2.2', 'port':6380, 'pass':''},                                            # Online Codis 
-                                #{'ip':'3.3.3.3', 'port':6382, 'pass':''},                                            # Online Codis
-                                {'ip':'4.4.4.4', 'port':6380, 'pass':''},                                            # Online Codis
-                             ]
-
+        self.codis_servers = ser_list
         self.redis_clients = {}
         for redis_no in range(len(self.codis_servers)):
             redis_host = self.codis_servers[redis_no]
@@ -43,6 +55,7 @@ class CodisTools:
                 self.redis_clients[redis_no] = redis.Redis(redis_host['ip'], redis_host['port'])
         self.keys_queue = Queue()
         self.mysql_server = ['1.1.1.1', '3306', 'user', 'aaaaa', 'db_name']
+    
     def display(self):
         print self.redis_clients
 
@@ -399,6 +412,7 @@ if __name__=="__main__":
         sys.exit(1)
 
     (options, args) = opt_parser.parse_args(sys.argv)
+    get_codis_server()
 
     codisTools = CodisTools()
     if options.mode == 1:
