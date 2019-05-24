@@ -3,8 +3,10 @@
 import zookeeper,redis
 import time
 
+zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
 ser_list = []
 ops = 0
+
 def codis_ops():
         handler = zookeeper.init("1.1.1.1:2181")
         data = zookeeper.get_children(handler,"/zk/codis/db/servers")
