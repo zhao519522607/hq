@@ -59,7 +59,7 @@ main() {
                     exit 1
                 fi
             else
-                echo -e "关键字出现次数为${node}_NUM,本次不进行重启!\n" >> $DIR/${node}_record
+                echo -e "关键字出现次数为$NUM,本次不进行重启!\n" >> $DIR/${node}_record
             fi
         done
     fi
