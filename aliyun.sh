@@ -23,7 +23,8 @@ if [ $AMX_ALERT_LEN -gt 1 ]; then
         echo "Start..." >> $DIR/${node}_record
         echo $TIME >> $DIR/${node}_record
         echo $node >> $DIR//${node}_record
-        ${node}_NUM=$(grep -o $node $DIR/${node}_record |wc -l)
+        suffix=$(echo $node |awk -F'.' '{print $(NF-1)"_"$NF}')
+        expr NUM_${suffix}=$(grep -o $node $DIR/${node}_record |wc -l)
     done
 fi
 
@@ -47,7 +48,8 @@ main() {
         for i in $(seq 1 "$AMX_ALERT_LEN"); do
     	    ref="AMX_ALERT_${i}_LABEL_node"
             node="$(echo "${!ref}" | cut -d: -f1)"
-            if [ ${node}_NUM -ge 3 ]; then
+            NUM=$(eval echo '$'NUM_${suffix})
+            if [ $NUM -ge 3 ]; then
                 /usr/bin/python3 /data/python/oper_instance.py "$node"
                 if [ $? -eq 0 ];then
                     rm -f $DIR/${node}_record
