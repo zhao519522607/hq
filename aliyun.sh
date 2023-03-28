@@ -48,7 +48,8 @@ main() {
         for i in $(seq 1 "$AMX_ALERT_LEN"); do
     	    ref="AMX_ALERT_${i}_LABEL_node"
             node="$(echo "${!ref}" | cut -d: -f1)"
-            NUM=$(eval echo '$'NUM_${suffix})
+           numname=$(eval echo '$'NUM_${suffix})
+            NUM=$(echo $numname |awk -F'=' '{print $2}')
             if [ $NUM -ge 3 ]; then
                 /usr/bin/python3 /data/python/oper_instance.py "$node"
                 if [ $? -eq 0 ];then
